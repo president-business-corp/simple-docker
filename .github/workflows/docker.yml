@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: simple-docker/metadata@trunk
+      - uses: ./metadata@trunk
         id: metadata
         with:
           image-name: ${{ env.IMAGE_NAME }}
