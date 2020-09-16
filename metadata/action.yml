@@ -9,6 +9,15 @@ inputs:
   file:
     description: 'Path and name of Dockerfile. Defaults to "Dockerfile"'
     default: 'Dockerfile'
+  description:
+    description: 'Description to appear on the Docker image page. Defaults to repository description'
+    default: '${{ github.event.repository.description }}'
+  url:
+    description: 'URL where users can learn more about the image. Defaults to repository owner URL'
+    default: '${{ github.event.repository.owner.html_url }}'
+  licenses:
+    description: 'Comma separated array of SPDX license ids for the image. Defaults to repository license'
+    default: '${{ github.event.repository.license.spdx_id }}'
   default-branch-label:
     description: 'Label for changes to the default branch. Defaults to "edge"'
     default: 'edge'
@@ -71,6 +80,11 @@ runs:
             TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
           fi
 
+          LABELS="$LABELS,org.opencontainers.image.title=${{ github.event.repository.name }}"
+          LABELS="$LABELS,org.opencontainers.image.description=${{ inputs.description }}"
+          LABELS="$LABELS,org.opencontainers.image.url=${{ inputs.url }}"
+          LABELS="$LABELS,org.opencontainers.image.source=${{ github.event.repository.html_url }}"
+          LABELS="$LABELS,org.opencontainers.image.licenses=${{ inputs.licenses }}"
           LABELS="$LABELS,com.github.repo.dockerfile=${FILE}"
           # Actions
           LABELS="$LABELS,com.github.actions.id=${GITHUB_ACTION}"
