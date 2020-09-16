@@ -12,6 +12,8 @@ inputs:
   description:
     description: 'Description to appear on the Docker image page. Defaults to repository description'
     default: '${{ github.event.repository.description }}'
+  documentation:
+    description: 'Documentation link for image README. Defaults to repository README'
   url:
     description: 'URL where users can learn more about the image. Defaults to repository owner URL'
     default: '${{ github.event.repository.owner.html_url }}'
@@ -50,6 +52,10 @@ runs:
           CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           FILE=${{ inputs.schedule-label }}
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          README=${{ inputs.documentation }}
+          if [ -z $README ]; then
+            README="${{ github.event.repository.html_url }}/blob/${BRANCH}/README.md"
+          fi
 
           LABELS="org.opencontainers.image.revision=${GITHUB_SHA}"
           LABELS="$LABELS,org.opencontainers.image.created=${CREATED}"
@@ -82,6 +88,7 @@ runs:
 
           LABELS="$LABELS,org.opencontainers.image.title=${{ github.event.repository.name }}"
           LABELS="$LABELS,org.opencontainers.image.description=${{ inputs.description }}"
+          LABELS="$LABELS,org.opencontainers.image.documentation=${README}"
           LABELS="$LABELS,org.opencontainers.image.url=${{ inputs.url }}"
           LABELS="$LABELS,org.opencontainers.image.source=${{ github.event.repository.html_url }}"
           LABELS="$LABELS,org.opencontainers.image.licenses=${{ inputs.licenses }}"
@@ -92,6 +99,9 @@ runs:
           LABELS="$LABELS,com.github.actions.run_number=${GITHUB_RUN_NUMBER}"
           LABELS="$LABELS,com.github.actions.actor=${GITHUB_ACTOR}"
 
+          BUILD_ARGS="BRANCH=$BRANCH"
+
+          echo ::set-output name=args::${BUILD_ARGS}
           echo ::set-output name=labels::${LABELS}
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
