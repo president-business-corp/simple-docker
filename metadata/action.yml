@@ -51,7 +51,7 @@ runs:
           DOCKER_IMAGE=${{ inputs.registry }}/${{ inputs.image-name }}
           DOCKER_IMAGE=$(echo $DOCKER_IMAGE | tr '[A-Z]' '[a-z]')
           CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          FILE=${{ inputs.schedule-label }}
+          FILE=${{ inputs.file }}
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
           README=${{ inputs.documentation }}
           if [ -z $README ]; then
