@@ -23,7 +23,7 @@ inputs:
   default-branch-label:
     description: 'Label for changes to the default branch. Defaults to "edge"'
     default: 'edge'
-  schedule-label:
+  scheduled-label:
     description: 'Label for scheduled / nigtly build. Defaults to "nightly"'
     default: 'nightly'
 outputs:
@@ -45,31 +45,64 @@ outputs:
 runs:
   using: "composite"
   steps: 
-    - id: metadata
+    - id: defaults
       shell: bash
       run: |
           DOCKER_IMAGE=${{ inputs.registry }}/${{ inputs.image-name }}
           DOCKER_IMAGE=$(echo $DOCKER_IMAGE | tr '[A-Z]' '[a-z]')
-          CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=image-name::${DOCKER_IMAGE}
+
+          SOURCE=${{ github.event.repository.html_url }}
+          echo ::set-output name=source::${SOURCE}
+
           FILE=${{ inputs.file }}
+          echo ::set-output name=file::${FILE}
+          
+          DESCRIPTION=${{ inputs.description }}
+          echo ::set-output name=description::${DESCRIPTION}
+          
+          TITLE=${{ github.event.repository.name }}
+          echo ::set-output name=title::${TITLE}
+          
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          README=${{ inputs.documentation }}
-          if [ -z $README ]; then
-            README="${{ github.event.repository.html_url }}/blob/${BRANCH}/README.md"
+          echo ::set-output name=branch::${BRANCH}
+          
+          DOCUMENTATION=${{ inputs.documentation }}
+          if [ -z $DOCUMENTATION ]; then
+            DOCUMENTATION="${{ github.event.repository.html_url }}/blob/${BRANCH}/README.md"
           fi
+          echo ::set-output name=documentation::${DOCUMENTATION}
+
+          URL=${{ inputs.url }}
+          echo ::set-output name=url::${URL}
+
+          LICENSES=${{ inputs.licenses }}
+          echo ::set-output name=licenses::${LICENSES}
+
+          DBL=${{ inputs.default-branch-label }}
+          echo ::set-output name=default-branch-label::${DBL}
+
+          SCHEDULED_LABEL=${{ inputs.scheduled-label }}
+          echo ::set-output name=scheduled-label::${SCHEDULED_LABEL}
+    - id: metadata
+      shell: bash
+      run: |
+          DOCKER_IMAGE=${{ steps.defaults.outputs.image-name }}
+
+          CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
           LABELS="org.opencontainers.image.revision=${GITHUB_SHA}"
           LABELS="$LABELS,org.opencontainers.image.created=${CREATED}"
-          LABELS="$LABELS,com.github.repo.branch=${BRANCH}"
+          LABELS="$LABELS,com.github.repo.branch=${{ steps.defaults.outputs.branch }}"
           
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=${{ inputs.schedule-label }}
+            VERSION=${{ steps.defaults.outputs.scheduled-label }}
           elif [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           elif [[ $GITHUB_REF == refs/heads/* ]]; then
             VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
             if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=${{ inputs.default-branch-label }}
+              VERSION=${{ steps.defaults.outputs.default-branch-label }}
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
             VERSION=pr-${{ github.event.number }}
@@ -87,24 +120,24 @@ runs:
             TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
           fi
 
-          LABELS="$LABELS,org.opencontainers.image.title=${{ github.event.repository.name }}"
-          LABELS="$LABELS,org.opencontainers.image.description=${{ inputs.description }}"
-          LABELS="$LABELS,org.opencontainers.image.documentation=${README}"
-          LABELS="$LABELS,org.opencontainers.image.url=${{ inputs.url }}"
-          LABELS="$LABELS,org.opencontainers.image.source=${{ github.event.repository.html_url }}"
-          LABELS="$LABELS,org.opencontainers.image.licenses=${{ inputs.licenses }}"
-          LABELS="$LABELS,com.github.repo.dockerfile=${FILE}"
+          LABELS="$LABELS,org.opencontainers.image.title=${{ steps.defaults.outputs.title }}"
+          LABELS="$LABELS,org.opencontainers.image.description=${{ steps.defaults.outputs.description }}"
+          LABELS="$LABELS,org.opencontainers.image.documentation=${{ steps.defaults.outputs.documentation }}"
+          LABELS="$LABELS,org.opencontainers.image.url=${{ steps.defaults.outputs.url }}"
+          LABELS="$LABELS,org.opencontainers.image.source=${{ steps.defaults.outputs.source }}"
+          LABELS="$LABELS,org.opencontainers.image.licenses=${{ steps.defaults.outputs.licenses }}"
+          LABELS="$LABELS,com.github.repo.dockerfile=${{ steps.defaults.outputs.file }}"
           # Actions
           LABELS="$LABELS,com.github.actions.id=${GITHUB_ACTION}"
           LABELS="$LABELS,com.github.actions.run_id=${GITHUB_RUN_ID}"
           LABELS="$LABELS,com.github.actions.run_number=${GITHUB_RUN_NUMBER}"
           LABELS="$LABELS,com.github.actions.actor=${GITHUB_ACTOR}"
 
-          BUILD_ARGS="BRANCH=$BRANCH"
+          BUILD_ARGS="BRANCH=${{ steps.defaults.outputs.branch }}"
 
           echo ::set-output name=args::${BUILD_ARGS}
           echo ::set-output name=labels::${LABELS}
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=file::${FILE}
+          echo ::set-output name=file::${{ steps.defaults.outputs.file }}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
