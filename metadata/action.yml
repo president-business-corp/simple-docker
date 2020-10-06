@@ -1,47 +1,47 @@
 inputs:
   image-name:
-    description: 'Name of image. Defaults to: repository_owner/default-image'
-    default: '${{ github.repository_owner }}/default-image'
+    description: "Name of image. Defaults to: repository_owner/default-image"
+    default: "${{ github.repository_owner }}/default-image"
     required: true
   registry:
-    description: 'URL of the registry. Defaults to: ghcr.io'
-    default: 'ghcr.io'
+    description: "URL of the registry. Defaults to: ghcr.io"
+    default: "ghcr.io"
   file:
-    description: 'Path and name of Dockerfile. Defaults to: Dockerfile'
-    default: 'Dockerfile'
+    description: "Path and name of Dockerfile. Defaults to: Dockerfile"
+    default: "Dockerfile"
   description:
-    description: 'Description to appear on the Docker image page. Defaults to repository description'
-    default: '${{ github.event.repository.description }}'
+    description: "Description to appear on the Docker image page. Defaults to repository description"
+    default: "${{ github.event.repository.description }}"
   documentation:
-    description: 'Documentation link for image README. Defaults to: README'
+    description: "Documentation link for image README. Defaults to: README"
   url:
-    description: 'URL where users can learn more about the image. Defaults to: repo URL'
-    default: '${{ github.event.repository.owner.html_url }}'
+    description: "URL where users can learn more about the image. Defaults to: repo URL"
+    default: "${{ github.event.repository.owner.html_url }}"
   licenses:
-    description: 'Comma separated array of SPDX license ids for the image. Defaults to: LICENSE'
-    default: '${{ github.event.repository.license.spdx_id }}'
+    description: "Comma separated array of SPDX license ids for the image. Defaults to: LICENSE"
+    default: "${{ github.event.repository.license.spdx_id }}"
   default-branch-label:
-    description: 'Label for changes to the default branch. Defaults to: edge'
-    default: 'edge'
+    description: "Label for changes to the default branch. Defaults to: edge"
+    default: "edge"
   scheduled-label:
-    description: 'Label for scheduled / nigtly build. Defaults to: nightly'
-    default: 'nightly'
+    description: "Label for scheduled / nigtly build. Defaults to: nightly"
+    default: "nightly"
 outputs:
   labels:
     description: "OCI Labels"
-    value: '${{ steps.metadata.outputs.labels }}'
+    value: "${{ steps.metadata.outputs.labels }}"
   tags:
     description: "Docker Tags"
-    value: '${{ steps.metadata.outputs.tags }}'
+    value: "${{ steps.metadata.outputs.tags }}"
   file:
     description: "Dockerfile location"
-    value: '${{ steps.metadata.outputs.file }}'
+    value: "${{ steps.metadata.outputs.file }}"
   created:
     description: "OCI Created At Date"
-    value: '${{ steps.metadata.outputs.created }}'
+    value: "${{ steps.metadata.outputs.created }}"
   version:
     description: "Docker image version"
-    value: '${{ steps.metadata.outputs.version }}'
+    value: "${{ steps.metadata.outputs.version }}"
 runs:
   using: "composite"
   steps: 
