@@ -1,30 +1,30 @@
 inputs:
   image-name:
-    description: 'Name of image. Defaults to "repository_owner/default-image"'
+    description: 'Name of image. Defaults to: repository_owner/default-image'
     default: '${{ github.repository_owner }}/default-image'
     required: true
   registry:
-    description: 'URL of the registry. Defaults to "ghcr.io"'
+    description: 'URL of the registry. Defaults to: ghcr.io'
     default: 'ghcr.io'
   file:
-    description: 'Path and name of Dockerfile. Defaults to "Dockerfile"'
+    description: 'Path and name of Dockerfile. Defaults to: Dockerfile'
     default: 'Dockerfile'
   description:
     description: 'Description to appear on the Docker image page. Defaults to repository description'
     default: '${{ github.event.repository.description }}'
   documentation:
-    description: 'Documentation link for image README. Defaults to repository README'
+    description: 'Documentation link for image README. Defaults to: README'
   url:
-    description: 'URL where users can learn more about the image. Defaults to repository owner URL'
+    description: 'URL where users can learn more about the image. Defaults to: repo URL'
     default: '${{ github.event.repository.owner.html_url }}'
   licenses:
-    description: 'Comma separated array of SPDX license ids for the image. Defaults to repository license'
+    description: 'Comma separated array of SPDX license ids for the image. Defaults to: LICENSE'
     default: '${{ github.event.repository.license.spdx_id }}'
   default-branch-label:
-    description: 'Label for changes to the default branch. Defaults to "edge"'
+    description: 'Label for changes to the default branch. Defaults to: edge'
     default: 'edge'
   scheduled-label:
-    description: 'Label for scheduled / nigtly build. Defaults to "nightly"'
+    description: 'Label for scheduled / nigtly build. Defaults to: nightly'
     default: 'nightly'
 outputs:
   labels:
@@ -84,15 +84,16 @@ runs:
 
           SCHEDULED_LABEL=${{ inputs.scheduled-label }}
           echo ::set-output name=scheduled-label::${SCHEDULED_LABEL}
+
+          CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=created::${CREATED}
     - id: metadata
       shell: bash
       run: |
           DOCKER_IMAGE=${{ steps.defaults.outputs.image-name }}
 
-          CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-
           LABELS="org.opencontainers.image.revision=${GITHUB_SHA}"
-          LABELS="$LABELS,org.opencontainers.image.created=${CREATED}"
+          LABELS="$LABELS,org.opencontainers.image.created=${{ steps.defaults.outputs.created }}"
           LABELS="$LABELS,com.github.repo.branch=${{ steps.defaults.outputs.branch }}"
           
           if [ "${{ github.event_name }}" = "schedule" ]; then
@@ -140,4 +141,4 @@ runs:
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=file::${{ steps.defaults.outputs.file }}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=created::${{ steps.defaults.outputs.created }}
