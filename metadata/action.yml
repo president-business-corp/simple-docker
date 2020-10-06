@@ -29,19 +29,19 @@ inputs:
 outputs:
   labels:
     description: "OCI Labels"
-    value: ${{ steps.metadata.outputs.labels }}
+    value: '${{ steps.metadata.outputs.labels }}'
   tags:
     description: "Docker Tags"
-    value: ${{ steps.metadata.outputs.tags }}
+    value: '${{ steps.metadata.outputs.tags }}'
   file:
     description: "Dockerfile location"
-    value: ${{ steps.metadata.outputs.file }}
+    value: '${{ steps.metadata.outputs.file }}'
   created:
     description: "OCI Created At Date"
-    value: ${{ steps.metadata.outputs.created }}
+    value: '${{ steps.metadata.outputs.created }}'
   version:
     description: "Docker image version"
-    value: ${{ steps.metadata.outputs.version }}
+    value: '${{ steps.metadata.outputs.version }}'
 runs:
   using: "composite"
   steps: 
