@@ -43,7 +43,12 @@ outputs:
     value: "${{ steps.metadata.outputs.version }}"
 runs:
   using: "composite"
-  steps: 
+  steps:
+    - name: Repo meta
+      id: repo
+      uses: actions/github-script@v3
+      with:
+        script: return await github.repos.get(context.repo).data;
     - id: defaults
       shell: bash
       run: |
@@ -62,10 +67,10 @@ runs:
           FILE="${{ inputs.file }}"
           echo ::set-output name=file::${FILE}
           
-          DESCRIPTION="${{ inputs.description }}" || "${{ github.event.repository.description }}"
+          DESCRIPTION="${{ inputs.description }}" || "${{ fromJson(steps.repo.outputs.result).description }}"
           echo ::set-output name=description::${DESCRIPTION}
           
-          TITLE="${{ github.event.repository.name }}"
+          TITLE="${{ fromJson(steps.repo.outputs.result).name }}"
           echo ::set-output name=title::${TITLE}
           
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -77,10 +82,13 @@ runs:
           fi
           echo ::set-output name=documentation::${DOCUMENTATION}
 
-          URL=${{ inputs.url }} || ${{ github.event.repository.owner.html_url }}
+          URL="${{ inputs.url }}" || "${{ fromJson(steps.repo.outputs.result).html_url }}"
           echo ::set-output name=url::${URL}
 
-          LICENSES=${{ inputs.licenses }} || ${{ github.event.repository.license.spdx_id }}
+          VCS="${{ fromJson(steps.repo.outputs.result).clone_url }}"
+          echo ::set-output name=vcs::${VCS}
+
+          LICENSES="${{ inputs.licenses }}" || "${{ fromJson(steps.repo.outputs.result).license.spdx_id }}"
           echo ::set-output name=licenses::${LICENSES}
 
           DBL=${{ inputs.default-branch-label }}
@@ -131,6 +139,7 @@ runs:
           LABELS="$LABELS,org.opencontainers.image.documentation=${{ steps.defaults.outputs.documentation }}"
           LABELS="$LABELS,org.opencontainers.image.url=${{ steps.defaults.outputs.url }}"
           LABELS="$LABELS,org.opencontainers.image.source=${{ steps.defaults.outputs.source }}"
+          LABELS="$LABELS,org.opencontainers.image.vcs=${{ steps.defaults.outputs.vcs }}"
           LABELS="$LABELS,org.opencontainers.image.licenses=${{ steps.defaults.outputs.licenses }}"
           LABELS="$LABELS,com.github.repo.dockerfile=${{ steps.defaults.outputs.file }}"
           # Actions
@@ -148,3 +157,4 @@ runs:
           echo ::set-output name=first-tag::${FIRST_TAG}
           echo ::set-output name=file::${{ steps.defaults.outputs.file }}
           echo ::set-output name=created::${{ steps.defaults.outputs.created }}
+          
