@@ -29,6 +29,9 @@ outputs:
   tags:
     description: "Docker Tags"
     value: "${{ steps.metadata.outputs.tags }}"
+  first-tag:
+    description: "Canonical Docker Tag"
+    value: "${{ steps.metadata.outputs.first-tag }}"
   file:
     description: "Dockerfile location"
     value: "${{ steps.metadata.outputs.file }}"
@@ -113,6 +116,7 @@ runs:
 
           LABELS="$LABELS,org.opencontainers.image.version=${VERSION}"
           TAGS="${DOCKER_IMAGE}:${VERSION}"
+          FIRST_TAG="${TAGS}"
 
           if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
             MINOR=${VERSION%.*}
@@ -141,5 +145,6 @@ runs:
           echo ::set-output name=labels::${LABELS}
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=first-tag::${FIRST_TAG}
           echo ::set-output name=file::${{ steps.defaults.outputs.file }}
           echo ::set-output name=created::${{ steps.defaults.outputs.created }}
