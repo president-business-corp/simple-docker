@@ -44,8 +44,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Repo meta
-      id: repo
+    - id: repo
       uses: actions/github-script@v3
       with:
         script: return await github.repos.get(context.repo).data;
