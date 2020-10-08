@@ -44,25 +44,25 @@ runs:
     - id: defaults
       shell: bash
       run: |
-          IMAGE_NAME=${{ inputs.image-name }}
+          IMAGE_NAME="${{ inputs.image-name }}"
           if [ -z $IMAGE_NAME ]; then
             IMAGE_NAME = "${{ github.repository_owner }}/default-image"
           fi
 
-          DOCKER_IMAGE=${{ inputs.registry }}/$IMAGE_NAME
-          DOCKER_IMAGE=$(echo $DOCKER_IMAGE | tr '[A-Z]' '[a-z]')
+          DOCKER_IMAGE="${{ inputs.registry }}/$IMAGE_NAME"
+          DOCKER_IMAGE="$(echo $DOCKER_IMAGE | tr '[A-Z]' '[a-z]')"
           echo ::set-output name=image-name::${DOCKER_IMAGE}
 
-          SOURCE=${{ github.event.repository.html_url }}
+          SOURCE="${{ github.event.repository.html_url }}"
           echo ::set-output name=source::${SOURCE}
 
-          FILE=${{ inputs.file }}
+          FILE="${{ inputs.file }}"
           echo ::set-output name=file::${FILE}
           
-          DESCRIPTION=${{ inputs.description }} || ${{ github.event.repository.description }}
+          DESCRIPTION="${{ inputs.description }}" || "${{ github.event.repository.description }}"
           echo ::set-output name=description::${DESCRIPTION}
           
-          TITLE=${{ github.event.repository.name }}
+          TITLE="${{ github.event.repository.name }}"
           echo ::set-output name=title::${TITLE}
           
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
