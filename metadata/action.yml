@@ -80,7 +80,7 @@ runs:
           URL="${{ inputs.url }}"
           echo ::set-output name=url::${URL}
 
-          VCS="${{ fromJson(steps.repo.outputs.result).clone_url }}"
+          VCS="${{ github.repositoryUrl }}"
           echo ::set-output name=vcs::${VCS}
 
           LICENSES="${{ inputs.licenses }}"
