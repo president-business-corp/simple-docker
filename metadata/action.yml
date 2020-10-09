@@ -44,10 +44,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - id: repo
-      uses: actions/github-script@v3
-      with:
-        script: return await github.repos.get(context.repo).data;
     - id: defaults
       shell: bash
       run: |
@@ -66,10 +62,10 @@ runs:
           FILE="${{ inputs.file }}"
           echo ::set-output name=file::${FILE}
           
-          DESCRIPTION="${{ inputs.description }}" || "${{ fromJson(steps.repo.outputs.result).description }}"
+          DESCRIPTION="${{ inputs.description }}"
           echo ::set-output name=description::${DESCRIPTION}
           
-          TITLE="${{ fromJson(steps.repo.outputs.result).name }}"
+          TITLE="NO YET IMPLEMENTED"
           echo ::set-output name=title::${TITLE}
           
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -81,13 +77,13 @@ runs:
           fi
           echo ::set-output name=documentation::${DOCUMENTATION}
 
-          URL="${{ inputs.url }}" || "${{ fromJson(steps.repo.outputs.result).html_url }}"
+          URL="${{ inputs.url }}"
           echo ::set-output name=url::${URL}
 
           VCS="${{ fromJson(steps.repo.outputs.result).clone_url }}"
           echo ::set-output name=vcs::${VCS}
 
-          LICENSES="${{ inputs.licenses }}" || "${{ fromJson(steps.repo.outputs.result).license.spdx_id }}"
+          LICENSES="${{ inputs.licenses }}"
           echo ::set-output name=licenses::${LICENSES}
 
           DBL=${{ inputs.default-branch-label }}
